@@ -27,6 +27,7 @@ $GLOBALS['TL_DCA']['tl_video_converting'] = [
                 'href' => 'act=edit'
             ],
             'convert' => [
+                'label' => ['', 'Video-Konvertierung starten'],
                 'icon' => 'sync.svg',
                 'href' => 'key=convert'
             ],
