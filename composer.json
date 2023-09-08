@@ -1,6 +1,13 @@
 {
   "name": "alnv/video-converter-bundle",
   "type": "contao-bundle",
+  "license": "LGPL-3.0-or-later",
+  "keywords": [
+    "video",
+    "converter",
+    "contao",
+    "mp4"
+  ],
   "authors": [
     {
       "name": "Alexander Naumov",
