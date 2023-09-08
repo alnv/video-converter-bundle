@@ -1,0 +1,36 @@
+{
+  "name": "alnv/video-converter-bundle",
+  "type": "contao-bundle",
+  "authors": [
+    {
+      "name": "Alexander Naumov",
+      "email": "mail@alexandernaumov.de"
+    }
+  ],
+  "require": {
+    "contao/core-bundle":"~4.9",
+    "php-ffmpeg/php-ffmpeg": "^0.19"
+  },
+  "autoload": {
+    "psr-4": {
+      "Alnv\\VideoConverterBundle\\": "src/"
+    },
+    "classmap": [
+      "src/Resources/contao/"
+    ],
+    "exclude-from-classmap": [
+      "src/Resources/contao/dca/",
+      "src/Resources/contao/config/",
+      "src/Resources/contao/languages/",
+      "src/Resources/contao/templates/"
+    ]
+  },
+  "extra": {
+    "contao": {
+      "sources": {
+        "": "system/modules/contao-video-converter-bundle"
+      }
+    },
+    "contao-manager-plugin": "Alnv\\VideoConverterBundle\\ContaoManager\\Plugin"
+  }
+}

@@ -1,0 +1,3 @@
+converting-video:
+  resource: "@AlnvVideoConverterBundle/Controller"
+  type: annotation

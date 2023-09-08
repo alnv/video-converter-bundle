@@ -1,0 +1,101 @@
+<?php
+
+$objCombiner = new \Combiner();
+$objCombiner->add('bundles/alnvvideoconverter/vue.min.js');
+$objCombiner->add('bundles/alnvvideoconverter/vue-resource.min.js');
+$GLOBALS['TL_JAVASCRIPT']['vue'] = $objCombiner->getCombinedFile();
+?>
+<style>
+    .be_video_converter {
+        background: #f0c674;
+        padding: 15px;
+    }
+    .be_video_converter h2 {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .be_video_converter .error {
+        margin: 0 0 1rem 0;
+        padding: 5px;
+        background: tomato;
+        color: #fff;
+    }
+    .be_video_converter ul {
+        margin: 1rem 0;
+    }
+    .be_video_converter ul li {
+        background: #fff;
+        padding: 10px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+    .be_video_converter ul li.active {
+        color: #00a0ba;
+    }
+    .be_video_converter ul li.done {
+        color: #0b9e32;
+    }
+    .be_video_converter ul li img {
+        max-height: 16px;
+        margin-right: 5px;
+    }
+</style>
+<div id="convert-<?= $this->id ?>" class="be_video_converter">
+    <h2>Video Konvertierung läuft …</h2>
+    <div class="outputs">
+        <p class="error" v-if="error">{{ errorMessage }}</p>
+        <ul v-for="(output, pos) in outputs">
+            <li v-bind:class="{active: pos==index, done: pos<index}"><img v-if="pos==index" src="/system/themes/flexible/icons/loading.svg" alt=""> Video - {{ output.width }}</li>
+        </ul>
+    </div>
+</div>
+<script>
+    (function () {
+        new Vue({
+            el: '#convert-<?= $this->id ?>',
+            data: {
+                outputs: <?= json_encode((empty($this->outputs)?[]:$this->outputs), 0, 512) ?>,
+                active: [],
+                index: 0,
+                totalIndex: 0,
+                error: false,
+                errorMessage: ""
+            },
+            methods: {
+                start: function () {
+                    this.$http.post('converting-video/<?= $this->id ?>/' + this.index, {},
+                        {
+                            emulateJSON: true,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    ).then(function (res) {
+                        if (this.index <= this.totalIndex && res.body.ok) {
+                            this.index = this.index + 1;
+                            this.start();
+                        }
+                        if (this.index === this.totalIndex && res.body.ok) {
+                            this.end();
+                        }
+                        if (!res.body.ok) {
+                            this.error = true;
+                            this.errorMessage = res.body.message;
+                        }
+                    }.bind(this));
+                },
+                end: function () {
+                    window.location.replace("/contao?do=video-converter");
+                }
+            },
+            watch: {},
+            mounted: function () {
+                for (let i=0;i<this.outputs.length;i++) {
+                    this.outputs['active'] = false;
+                    this.totalIndex = i;
+                }
+                this.start()
+            }
+        })
+    })();
+</script>
