@@ -58,7 +58,7 @@ class VideoConverterController extends AbstractController {
 
             $objFFMpeg = FFMpeg::create([
                 'timeout' => 3600 * 12,
-                'ffmpeg.threads' => 12,
+                // 'ffmpeg.threads' => 12,
                 'ffmpeg.binaries' => \Config::get('ffmpegbinaries'),
                 'ffprobe.binaries' => \Config::get('ffprobebinaries'),
             ]);
