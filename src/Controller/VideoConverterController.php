@@ -2,27 +2,28 @@
 
 namespace Alnv\VideoConverterBundle\Controller;
 
+use Contao\FilesModel;
+use Contao\Database;
+use Contao\Dbafs;
+use Contao\Config;
+use Contao\StringUtil;
+use Contao\CoreBundle\Controller\AbstractController;
+use FFMpeg\Coordinate\Dimension;
+use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use FFMpeg\Format\Video\X264;
-use FFMpeg\Coordinate\Dimension;
-use FFMpeg\Coordinate\TimeCode;
-use Contao\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 
-/**
- *
- * @Route("/", defaults={"_scope"="frontend", "_token_check"=false})
- */
-class VideoConverterController extends AbstractController {
 
-    /**
-     *
-     * @Route("/converting-video/{id}/{index}", methods={"GET", "POST"}, name="convert-video")
-     */
-    public function convertVideo($id, $index) {
+#[Route(path: '/', name: 'video-converter-controller', defaults: ['_scope' => 'frontend', '_token_check' => false])]
+class VideoConverterController extends AbstractController
+{
+
+    #[Route(path: '/converting-video/{id}/{index}', methods: ["POST", "GET"])]
+    public function convertVideo($id, $index): JsonResponse
+    {
 
         $this->container->get('contao.framework')->initialize();
 
@@ -31,8 +32,8 @@ class VideoConverterController extends AbstractController {
             'message' => ''
         ];
 
-        $objSettings = \Database::getInstance()->prepare('SELECT * FROM tl_video_converting WHERE id=?')->limit(1)->execute($id);
-        $arrOutput = \StringUtil::deserialize($objSettings->outputs, true)[$index] ?? [];
+        $objSettings = Database::getInstance()->prepare('SELECT * FROM tl_video_converting WHERE id=?')->limit(1)->execute($id);
+        $arrOutput = StringUtil::deserialize($objSettings->outputs, true)[$index] ?? [];
 
         if (empty($arrOutput)) {
             $arrReturn['ok'] = false;
@@ -40,8 +41,8 @@ class VideoConverterController extends AbstractController {
             return new JsonResponse($arrReturn);
         }
 
-        $objVideoFile = \FilesModel::findByUuid($objSettings->source);
-        $objDestFolder = \FilesModel::findByUuid($objSettings->dest);
+        $objVideoFile = FilesModel::findByUuid($objSettings->source);
+        $objDestFolder = FilesModel::findByUuid($objSettings->dest);
 
         if (!$objDestFolder) {
             $arrReturn['ok'] = false;
@@ -58,9 +59,8 @@ class VideoConverterController extends AbstractController {
 
             $objFFMpeg = FFMpeg::create([
                 'timeout' => 3600 * 12,
-                // 'ffmpeg.threads' => 12,
-                'ffmpeg.binaries' => \Config::get('ffmpegbinaries'),
-                'ffprobe.binaries' => \Config::get('ffprobebinaries'),
+                'ffmpeg.binaries' => Config::get('ffmpegbinaries'),
+                'ffprobe.binaries' => Config::get('ffprobebinaries'),
             ]);
 
             $strVideoName = $objVideoFile->path;
@@ -70,12 +70,12 @@ class VideoConverterController extends AbstractController {
 
             if (!file_exists($objDestFolder->path . '/' . $strVideoName)) {
                 mkdir(TL_ROOT . '/' . $objDestFolder->path . '/' . $strVideoName);
-                \Dbafs::addResource($objDestFolder->path . '/' . $strVideoName);
+                Dbafs::addResource($objDestFolder->path . '/' . $strVideoName);
             }
 
             $strTargetFileName = $objDestFolder->path . '/' . $strVideoName . "/video_{$arrOutput['height']}p.mp4";
 
-            $strThumbnail = $objDestFolder->path . '/' . $strVideoName .'/video_thumbnail.jpg';
+            $strThumbnail = $objDestFolder->path . '/' . $strVideoName . '/video_thumbnail.jpg';
 
             if (!file_exists(TL_ROOT . '/' . $strThumbnail)) {
                 $this->thumbnail($strThumbnail, $objVideoFile->path);
@@ -92,15 +92,16 @@ class VideoConverterController extends AbstractController {
         return new JsonResponse($arrReturn);
     }
 
-    protected function thumbnail($strThumbnail, $strVideoPath) {
+    protected function thumbnail($strThumbnail, $strVideoPath): void
+    {
 
         $objFFProbe = FFProbe::create([
-            'ffmpeg.binaries' => \Config::get('ffmpegbinaries'),
-            'ffprobe.binaries' => \Config::get('ffprobebinaries'),
+            'ffmpeg.binaries' => Config::get('ffmpegbinaries'),
+            'ffprobe.binaries' => Config::get('ffprobebinaries')
         ]);
         $objFFMpeg = FFMpeg::create([
-            'ffmpeg.binaries' => \Config::get('ffmpegbinaries'),
-            'ffprobe.binaries' => \Config::get('ffprobebinaries'),
+            'ffmpeg.binaries' => Config::get('ffmpegbinaries'),
+            'ffprobe.binaries' => Config::get('ffprobebinaries')
         ]);
 
         $intDuration = floor($objFFProbe->format(TL_ROOT . '/' . $strVideoPath)->get('duration'));

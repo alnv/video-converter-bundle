@@ -1,11 +1,14 @@
 <?php
 
+use Alnv\VideoConverterBundle\Backend\ConvertView;
+use Contao\ArrayUtil;
+
 $GLOBALS['BE_MOD']['video-converter-bundle'] = [];
 
-array_insert($GLOBALS['BE_MOD']['video-converter-bundle'], 1, [
+ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['video-converter-bundle'], 1, [
     'video-converter' => [
         'name' => 'video-converter',
-        'convert' => [\Alnv\VideoConverterBundle\Backend\ConvertView::class, 'compile'],
+        'convert' => [ConvertView::class, 'compile'],
         'tables' => [
             'tl_video_converting'
         ]
