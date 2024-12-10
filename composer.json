@@ -16,7 +16,8 @@
   ],
   "require": {
     "contao/core-bundle":"~4.13",
-    "php-ffmpeg/php-ffmpeg": "^0.19"
+    "php-ffmpeg/php-ffmpeg": "^0.19",
+    "menatwork/contao-multicolumnwizard-bundle": "^3.6"
   },
   "autoload": {
     "psr-4": {
